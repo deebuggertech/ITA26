@@ -1,0 +1,5 @@
+[
+  { "key": "stability", "label": "Stabilität", "description": "1 = geringe, 10 = sehr hohe Tragfähigkeit" },
+  { "key": "insulation", "label": "Isolierung", "description": "1 = kaum isolierend, 10 = sehr gut gedämmt" },
+  { "key": "weather", "label": "Witterungsbeständigkeit", "description": "1 = wetteranfällig, 10 = dauerhaft wetterfest" }
+]

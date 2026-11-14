@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Holzbalken",
+    "description": "Konstruktionsholz als Balken, Angabe der Länge pro Stück",
+    "fields": [
+      { "key": "length", "label": "Länge", "units": { "cm": 1, "m": 100 }, "default_unit": "cm" },
+      { "key": "quantity", "label": "Anzahl", "unit_label": "Stück", "integer": true }
+    ]
+  },
+  {
+    "name": "Sperrholzplatten",
+    "description": "Platten mit Länge × Breite × Dicke pro Stück",
+    "fields": [
+      { "key": "length", "label": "Länge", "units": { "cm": 1, "m": 100 }, "default_unit": "cm" },
+      { "key": "width", "label": "Breite", "units": { "cm": 1, "m": 100 }, "default_unit": "cm" },
+      { "key": "thickness", "label": "Dicke", "units": { "mm": 0.1, "cm": 1 }, "default_unit": "cm" },
+      { "key": "quantity", "label": "Anzahl", "unit_label": "Stück", "integer": true }
+    ]
+  },
+  {
+    "name": "Nägel",
+    "description": "Befestigungsmaterial, Angabe als Stückzahl",
+    "fields": [
+      { "key": "quantity", "label": "Menge", "unit_label": "Stück", "integer": true }
+    ]
+  }
+]
