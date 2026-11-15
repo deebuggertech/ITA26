@@ -27,10 +27,23 @@ export interface MaterialType {
   fields: FieldDef[];
 }
 
+/** A single value, or a [from, to] range when the criterion's kind is "range". */
+export type Rating = number | [number, number];
+
 export interface Criterion {
   key: string;
   label: string;
   description: string;
+  unit: string;
+  kind: "value" | "range";
+  min: number;
+  max: number;
+  step: number;
+}
+
+export interface Bounds {
+  min?: number;
+  max?: number;
 }
 
 /** What the supplier form produces; sent as-is to POST /api/offers. */
@@ -75,14 +88,14 @@ export interface Recipe {
   description: string;
   build_minutes: number;
   shelter_person_factor: number;
-  ratings: Record<string, number>;
+  ratings: Record<string, Rating>;
 }
 
 export interface RecipeUpdate {
   description: string;
   build_minutes: number;
   shelter_person_factor: number;
-  ratings: Record<string, number>;
+  ratings: Record<string, Rating>;
 }
 
 export interface SupplierEstimate {
@@ -107,6 +120,7 @@ export interface Module {
 
 export interface ScoreRow {
   name: string;
+  slug: string;
   kind: "Zulieferer" | "Hersteller";
   modules: number;
   score: number;
@@ -118,7 +132,7 @@ export interface AidGroup {
   count: number;
   shelter_person_factor: number;
   people: number;
-  ratings: Record<string, number>;
+  ratings: Record<string, Rating>;
 }
 
 export interface AidResult {

@@ -8,7 +8,7 @@ from fastapi import HTTPException
 
 from . import config_files, recipe_store, settings
 from .auth import USERS
-from .schemas import MAX_BATCH, ItemIn
+from .schemas import MAX_BATCH, Bounds, ItemIn
 
 _DIM_COLUMNS = {"length": "length_cm", "width": "width_cm", "thickness": "thickness_cm"}
 _DATA_URL = re.compile(r"^data:image/(png|jpe?g|webp|gif);base64,(.+)$", re.S)
@@ -78,6 +78,11 @@ def delivered_inventory(conn: Connection) -> list[dict]:
     return [{**dict(r), "quantity": r["remaining"]} for r in rows]
 
 
+def _persons(value: float) -> int:
+    # Half-up; Python's round() would send 2.5 down to 2.
+    return int(value + 0.5)
+
+
 def _max_count(recipe: recipe_store.Recipe, inventory: list[dict]) -> int:
     stock = [dict(i) for i in inventory]
     n = 0
@@ -137,7 +142,7 @@ def supplier_estimate(conn: Connection, username: str) -> dict:
     credited = next((r for r in scoreboard(conn) if r["name"] == USERS[username].display_name), None)
     return {
         "credited_modules": credited["modules"], "credited_score": credited["score"],
-        "potential_modules": best[0], "potential_score": round(best[1], 2), "recipe_name": best[2],
+        "potential_modules": best[0], "potential_score": _persons(best[1]), "recipe_name": best[2],
     }
 
 
@@ -153,29 +158,42 @@ def scoreboard(conn: Connection) -> list[dict]:
     for user in USERS.values():
         if user.role == "supplier":
             modules, score = credited.get(user.username, (0, 0))
-            rows.append({"name": user.display_name, "kind": "Zulieferer", "modules": modules, "score": score})
+            rows.append({"name": user.display_name, "slug": user.username, "kind": "Zulieferer", "modules": modules, "score": score})
     # Regnauer builds every module, so it is credited with all of them.
     total = conn.execute("SELECT COUNT(*) AS n, COALESCE(SUM(factor),0) AS s FROM modules").fetchone()
-    rows.append({"name": "Regnauer", "kind": "Hersteller", "modules": total["n"], "score": total["s"]})
+    rows.append({"name": "Regnauer", "slug": "regnauer", "kind": "Hersteller", "modules": total["n"], "score": total["s"]})
     for row in rows:
-        row["score"] = round(row["score"], 2)
-    return sorted(rows, key=lambda r: -r["score"])
+        row["score"] = _persons(row["score"])
+    # Alphabetical on purpose: the public page lists contributions, it is not a ranking.
+    return sorted(rows, key=lambda r: r["name"])
 
 
-def aid_search(conn: Connection, people: int, min_ratings: dict[str, int]) -> dict:
-    known = {c["key"] for c in config_files.criteria()}
-    if set(min_ratings) - known:
+def _matches(criterion: dict, rating, bounds: Bounds) -> bool:
+    if criterion["kind"] == "range":
+        # The module must be usable across the whole requested interval.
+        low, high = rating
+        return (bounds.min is None or low <= bounds.min) and (bounds.max is None or high >= bounds.max)
+    return (bounds.min is None or rating >= bounds.min) and (bounds.max is None or rating <= bounds.max)
+
+
+def aid_search(conn: Connection, people: int, filters: dict[str, Bounds]) -> dict:
+    criteria = {c["key"]: c for c in config_files.criteria()}
+    if set(filters) - set(criteria):
         raise HTTPException(422, "Unbekanntes Kriterium")
+    if any(b.min is not None and b.max is not None and b.min > b.max for b in filters.values()):
+        raise HTTPException(422, "Untergrenze liegt über der Obergrenze")
     groups = []
     rows = conn.execute(
         "SELECT recipe_id, recipe_name, factor, ratings, COUNT(*) AS n FROM modules GROUP BY recipe_id"
     ).fetchall()
     for r in rows:
         ratings = json.loads(r["ratings"])
-        if all(ratings.get(key, 0) >= minimum for key, minimum in min_ratings.items()):
+        if all(key in ratings and _matches(criteria[key], ratings[key], b) for key, b in filters.items()):
             groups.append({
                 "recipe_id": r["recipe_id"], "recipe_name": r["recipe_name"], "count": r["n"],
-                "shelter_person_factor": r["factor"], "people": round(r["n"] * r["factor"], 2), "ratings": ratings,
+                "shelter_person_factor": r["factor"], "people": _persons(r["n"] * r["factor"]), "ratings": ratings,
+                "_raw_people": r["n"] * r["factor"],
             })
-    total = round(sum(g["people"] for g in groups), 2)
-    return {"groups": groups, "total_people": total, "requested": people, "shortfall": max(0, round(people - total, 2))}
+    # Round the sum, not the parts, so the total is not skewed by many small remainders.
+    total = _persons(sum(g.pop("_raw_people") for g in groups))
+    return {"groups": groups, "total_people": total, "requested": people, "shortfall": max(0, people - total)}

@@ -1,6 +1,6 @@
 import { api } from "./client";
 import type {
-  AidResult, BuildableRecipe, Criterion, DemoUser, Item, MaterialType, Module, OfferResult, Recipe, RecipeUpdate,
+  AidResult, Bounds, BuildableRecipe, Criterion, DemoUser, Item, MaterialType, Module, OfferResult, Recipe, RecipeUpdate,
   ScoreRow, Session, ItemDraft, SupplierEstimate,
 } from "./types";
 
@@ -27,6 +27,6 @@ export const updateRecipe = (id: string, input: Omit<RecipeUpdate, "name" | "req
   api<Recipe>(`/regnauer/recipes/${id}`, { method: "PUT", body: input });
 
 export const scoreboard = () => api<ScoreRow[]>("/scoreboard");
-export const searchAid = (people: number, minRatings: Record<string, number>) =>
-  api<AidResult>("/aid/search", { body: { people, min_ratings: minRatings } });
+export const searchAid = (people: number, filters: Record<string, Bounds>) =>
+  api<AidResult>("/aid/search", { body: { people, filters } });
 export const supplierEstimate = () => api<SupplierEstimate>("/supplier/estimate");

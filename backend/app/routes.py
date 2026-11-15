@@ -120,10 +120,18 @@ def recipes(_: auth.User = manufacturer_only):
     return [r.summary() for r in recipe_store.all_recipes()]
 
 
-def _check_ratings(ratings: dict[str, int]) -> None:
-    keys = {c["key"] for c in config_files.criteria()}
-    if set(ratings) != keys or not all(1 <= v <= 10 for v in ratings.values()):
-        raise HTTPException(422, "Bewertungen müssen für alle Kriterien zwischen 1 und 10 liegen")
+def _check_ratings(ratings: dict) -> None:
+    criteria = {c["key"]: c for c in config_files.criteria()}
+    if set(ratings) != set(criteria):
+        raise HTTPException(422, "Werte müssen für alle Kriterien angegeben werden")
+    for key, value in ratings.items():
+        c = criteria[key]
+        is_range = isinstance(value, tuple)
+        if is_range != (c["kind"] == "range"):
+            raise HTTPException(422, f"{c['label']}: {'Bereich' if c['kind'] == 'range' else 'Einzelwert'} erwartet")
+        values = value if is_range else (value,)
+        if any(not c["min"] <= v <= c["max"] for v in values) or (is_range and value[0] > value[1]):
+            raise HTTPException(422, f"{c['label']}: Werte müssen zwischen {c['min']} und {c['max']} {c['unit']} liegen")
 
 
 @router.put("/regnauer/recipes/{recipe_id}", response_model=schemas.Recipe)
@@ -148,4 +156,4 @@ def scoreboard(db: Connection = DB):
 
 @router.post("/aid/search", response_model=schemas.AidResult)
 def aid_search(body: schemas.AidQuery, _: auth.User = aid_only, db: Connection = DB):
-    return services.aid_search(db, body.people, body.min_ratings)
+    return services.aid_search(db, body.people, body.filters)

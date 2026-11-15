@@ -32,8 +32,9 @@ def test_produce_consumes_stock_and_scores(client):
     stock = len(client.get("/api/regnauer/modules", headers=reg).json())
     assert client.post("/api/regnauer/produce/wandelement_leichtbau", headers=reg).status_code == 200
     assert len(client.get("/api/regnauer/modules", headers=reg).json()) == stock + 1
-    after = {r["name"]: r["score"] for r in client.get("/api/scoreboard").json()}
-    assert after["Holzwerk Bauer GmbH"] > {r["name"]: r["score"] for r in before}["Holzwerk Bauer GmbH"]
+    # Scores are whole persons now, so a single quarter-person module may not move them; the module count does.
+    after = {r["name"]: r["modules"] for r in client.get("/api/scoreboard").json()}
+    assert after["Holzwerk Bauer GmbH"] > {r["name"]: r["modules"] for r in before}["Holzwerk Bauer GmbH"]
 
 
 def test_produce_fails_without_material(client):
@@ -45,10 +46,24 @@ def test_produce_fails_without_material(client):
 
 def test_aid_filter(client):
     aid = login(client, "drk")
-    all_ = client.post("/api/aid/search", json={"people": 50}, headers=aid).json()
-    strict = client.post("/api/aid/search", json={"people": 50, "min_ratings": {"insulation": 9}}, headers=aid).json()
-    assert all_["total_people"] > 0 and strict["total_people"] == 0 and strict["shortfall"] == 50
-    assert client.post("/api/aid/search", json={"people": 5, "min_ratings": {"x": 1}}, headers=aid).status_code == 422
+    search = lambda **f: client.post("/api/aid/search", json={"people": 50, "filters": f}, headers=aid)
+    all_ = search().json()
+    assert all_["total_people"] > 0
+    strict = search(insulation={"min": 9}).json()
+    assert strict["total_people"] == 0 and strict["shortfall"] == 50
+    # Only the Ständer element covers -15 °C; the lightweight wall starts at -5 °C.
+    cold = search(temperature={"min": -15, "max": 20}).json()
+    assert {g["recipe_id"] for g in cold["groups"]} == {"holzstaender_element"}
+    assert search(temperature={"min": 10, "max": 0}).status_code == 422
+    assert search(x={"min": 1}).status_code == 422
+
+
+def test_recipe_ratings_validated(client):
+    reg = login(client, "regnauer")
+    rec = client.get("/api/regnauer/recipes", headers=reg).json()[0]
+    body = {k: rec[k] for k in ("description", "build_minutes", "shelter_person_factor")}
+    bad = client.put(f"/api/regnauer/recipes/{rec['id']}", json=body | {"ratings": {**rec["ratings"], "temperature": [30, -5]}}, headers=reg)
+    assert bad.status_code == 422
 
 
 def test_recipe_meta_update(client):

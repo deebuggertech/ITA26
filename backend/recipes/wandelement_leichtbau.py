@@ -6,7 +6,7 @@ META = {
     "description": "Leichtes Wandelement aus Platten, mit Nägeln verbunden.",
     "build_minutes": 20,
     "shelter_person_factor": 0.25,
-    "ratings": {"stability": 5, "insulation": 4, "weather": 6},
+    "ratings": {"temperature": [-5, 30], "snow_load": 1.5, "insulation": 1.2},
 }
 # META-END
 

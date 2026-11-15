@@ -6,7 +6,7 @@ META = {
     "description": "Tragendes Element aus Holzbalken und beplankten Platten.",
     "build_minutes": 45,
     "shelter_person_factor": 0.5,
-    "ratings": {"stability": 8, "insulation": 6, "weather": 7},
+    "ratings": {"temperature": [-20, 35], "snow_load": 3.5, "insulation": 2.4},
 }
 # META-END
 

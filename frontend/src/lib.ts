@@ -1,4 +1,4 @@
-import type { FieldDef, Item, ItemDraft, MaterialType } from "./api/types";
+import type { Criterion, FieldDef, Item, ItemDraft, MaterialType, Rating } from "./api/types";
 
 export interface Portal {
   slug: string;
@@ -58,3 +58,12 @@ export function readAsDataUrl(file: File): Promise<string> {
 }
 
 export const defaultUnit = (f: FieldDef) => f.default_unit ?? Object.keys(f.units ?? {})[0] ?? "";
+
+export function formatRating(c: Criterion, value: Rating | undefined): string {
+  if (value === undefined) return "–";
+  const text = Array.isArray(value) ? `${value[0]} … ${value[1]}` : String(value);
+  return `${text} ${c.unit}`;
+}
+
+export const embedSnippet = (slug: string) =>
+  `<iframe src="${window.location.origin}/embed/${slug}" width="100%" height="130" style="border:0" title="Re:Build Impact"></iframe>`;

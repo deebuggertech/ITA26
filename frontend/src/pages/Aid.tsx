@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { criteria as loadCriteria, searchAid } from "../api/endpoints";
+import type { Bounds } from "../api/types";
 import { Layout } from "../components/Layout";
 import { useLoad } from "../hooks/useLoad";
+import { formatRating } from "../lib";
 
 export function AidPortal() {
   const criteria = useLoad(loadCriteria);
   const [people, setPeople] = useState(50);
-  const [minimums, setMinimums] = useState<Record<string, number>>({});
-  // 1 is the scale floor, so an untouched slider filters nothing.
-  const result = useLoad(() => searchAid(people, minimums), [people, minimums]);
+  const [filters, setFilters] = useState<Record<string, Bounds>>({});
+  const setBound = (key: string, side: keyof Bounds, raw: string) =>
+    setFilters((f) => ({ ...f, [key]: { ...f[key], [side]: raw === "" ? undefined : Number(raw) } }));
+  // Empty fields are dropped by JSON.stringify, so an untouched filter excludes nothing.
+  const result = useLoad(() => searchAid(people, filters), [people, filters]);
   const r = result.data;
 
   return (
@@ -23,10 +27,22 @@ export function AidPortal() {
               <input type="number" min={1} value={people} onChange={(e) => setPeople(Math.max(1, Number(e.target.value)))} />
             </label>
             {criteria.data?.map((c) => (
-              <label key={c.key}>
-                {c.label} mindestens: {minimums[c.key] ?? 1}
-                <input type="range" min={1} max={10} value={minimums[c.key] ?? 1} onChange={(e) => setMinimums({ ...minimums, [c.key]: Number(e.target.value) })} />
-              </label>
+              <fieldset key={c.key}>
+                <legend>{c.label} ({c.unit})</legend>
+                <div className="row">
+                  <label>
+                    {c.kind === "range" ? "Einsatz ab" : "Mindestens"}
+                    <input type="number" step={c.step} placeholder={String(c.min)} value={filters[c.key]?.min ?? ""} onChange={(e) => setBound(c.key, "min", e.target.value)} />
+                  </label>
+                  <label>
+                    {c.kind === "range" ? "Einsatz bis" : "Höchstens"}
+                    <input type="number" step={c.step} placeholder={String(c.max)} value={filters[c.key]?.max ?? ""} onChange={(e) => setBound(c.key, "max", e.target.value)} />
+                  </label>
+                </div>
+                <span className="muted">
+                  {c.kind === "range" ? "Modul muss den gesamten Bereich abdecken" : c.description}
+                </span>
+              </fieldset>
             ))}
           </div>
         </section>
@@ -48,7 +64,7 @@ export function AidPortal() {
                 <strong>{g.count} × {g.recipe_name}</strong>
                 <div className="muted">Faktor {g.shelter_person_factor} → {g.people} Personen</div>
                 <div className="muted">
-                  {criteria.data?.map((c) => `${c.label} ${g.ratings[c.key]}`).join(" · ")}
+                  {criteria.data?.map((c) => `${c.label} ${formatRating(c, g.ratings[c.key])}`).join(" · ")}
                 </div>
               </div>
             </article>

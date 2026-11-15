@@ -2,6 +2,7 @@ import { useState } from "react";
 import * as api from "../api/endpoints";
 import type { BuildableRecipe, Item, Module, Recipe } from "../api/types";
 import { Layout } from "../components/Layout";
+import { formatRating } from "../lib";
 import { MaterialCard } from "../components/MaterialCard";
 import { Modal } from "../components/Modal";
 import { RecipeForm } from "../components/RecipeForm";
@@ -113,7 +114,7 @@ function Plans() {
             <div className="muted">{r.description}</div>
             <div className="muted">
               {r.build_minutes} Min. · Faktor {r.shelter_person_factor} ·{" "}
-              {criteria.data!.map((c) => `${c.label} ${r.ratings[c.key]}`).join(" · ")}
+              {criteria.data!.map((c) => `${c.label} ${formatRating(c, r.ratings[c.key])}`).join(" · ")}
             </div>
           </div>
           <button onClick={() => setEditing(r)}>Bearbeiten</button>

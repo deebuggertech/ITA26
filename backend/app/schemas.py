@@ -4,6 +4,9 @@ from pydantic import BaseModel, Field
 
 MAX_BATCH = 1000
 
+# A criterion is either a single value or a (from, to) range, as defined in parts-criteria.json.
+Rating = float | tuple[float, float]
+
 
 class LoginRequest(BaseModel):
     username: str
@@ -73,7 +76,7 @@ class Recipe(BaseModel):
     description: str = ""
     build_minutes: int
     shelter_person_factor: float
-    ratings: dict[str, int]
+    ratings: dict[str, Rating]
 
 
 class BuildableRecipe(Recipe):
@@ -86,9 +89,9 @@ class ProduceIn(BaseModel):
 
 class SupplierEstimate(BaseModel):
     credited_modules: int
-    credited_score: float
+    credited_score: int
     potential_modules: int
-    potential_score: float
+    potential_score: int
     recipe_name: str | None
 
 
@@ -96,7 +99,7 @@ class RecipeMetaUpdate(BaseModel):
     description: str
     build_minutes: int = Field(gt=0)
     shelter_person_factor: float = Field(gt=0)
-    ratings: dict[str, int]
+    ratings: dict[str, Rating]
 
 
 class ModuleOut(BaseModel):
@@ -107,9 +110,14 @@ class ModuleOut(BaseModel):
     produced_at: str
 
 
+class Bounds(BaseModel):
+    min: float | None = None
+    max: float | None = None
+
+
 class AidQuery(BaseModel):
     people: int = Field(gt=0)
-    min_ratings: dict[str, int] = {}
+    filters: dict[str, Bounds] = {}
 
 
 class AidGroup(BaseModel):
@@ -117,19 +125,20 @@ class AidGroup(BaseModel):
     recipe_name: str
     count: int
     shelter_person_factor: float
-    people: float
-    ratings: dict[str, int]
+    people: int
+    ratings: dict[str, Rating]
 
 
 class AidResult(BaseModel):
     groups: list[AidGroup]
-    total_people: float
+    total_people: int
     requested: int
-    shortfall: float
+    shortfall: int
 
 
 class ScoreRow(BaseModel):
     name: str
+    slug: str
     kind: Literal["Zulieferer", "Hersteller"]
     modules: int
-    score: float
+    score: int

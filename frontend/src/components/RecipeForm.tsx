@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import type { Criterion, Recipe, RecipeUpdate } from "../api/types";
+import type { Criterion, Rating, Recipe, RecipeUpdate } from "../api/types";
 
 interface Props {
   criteria: Criterion[];
@@ -39,14 +39,33 @@ export function RecipeForm({ criteria, existing, onSubmit }: Props) {
       </div>
       <hr />
       {criteria.map((c) => (
-        <label key={c.key}>
-          {c.label}: {ratings[c.key]}
-          <input type="range" min={1} max={10} value={ratings[c.key]} onChange={(e) => setRatings({ ...ratings, [c.key]: Number(e.target.value) })} />
-          <span className="muted">{c.description}</span>
-        </label>
+        <RatingField key={c.key} criterion={c} value={ratings[c.key]} onChange={(v) => setRatings({ ...ratings, [c.key]: v })} />
       ))}
       {error && <p className="error">{error}</p>}
       <button type="submit" className="primary">Speichern</button>
     </form>
+  );
+}
+
+function RatingField({ criterion: c, value, onChange }: { criterion: Criterion; value: Rating; onChange: (v: Rating) => void }) {
+  const bounds = { min: c.min, max: c.max, step: c.step };
+  const [low, high] = Array.isArray(value) ? value : [value, value];
+  return (
+    <fieldset>
+      <legend>{c.label} ({c.unit})</legend>
+      <div className="row">
+        <label>
+          {c.kind === "range" ? "Von" : "Wert"}
+          <input type="number" {...bounds} value={low} onChange={(e) => onChange(c.kind === "range" ? [e.target.valueAsNumber, high] : e.target.valueAsNumber)} />
+        </label>
+        {c.kind === "range" && (
+          <label>
+            Bis
+            <input type="number" {...bounds} value={high} onChange={(e) => onChange([low, e.target.valueAsNumber])} />
+          </label>
+        )}
+      </div>
+      <span className="muted">{c.description} · Skala {c.min} … {c.max} {c.unit}</span>
+    </fieldset>
   );
 }

@@ -18,3 +18,10 @@ Reset: `backend/data/` löschen.
 - `backend/recipes/*.py`: `META`, `can_build(inventory)`, `consume_materials(inventory)`; Helfer in `_helpers.py`
 - Farben: Variablen am Anfang von `frontend/src/styles.css`
 - Logo/Hintergrund: `frontend/public/logo.jpg`, `hero.jpg` ersetzen (Pfad in `--hero-image`)
+
+## Demo-Website (iframe-Einbettung)
+Beispiel einer Firmenwebsite mit dem Badge (Frontend muss auf :5173 laufen):
+
+    cd demo-site && python3 -m http.server 5174
+
+Badge-Code pro Unternehmen: Scoreboard-Seite, Spalte „Einbetten“. Standort-Marker der Karte: `frontend/src/shelterSites.ts`.
