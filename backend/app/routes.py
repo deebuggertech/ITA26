@@ -3,7 +3,7 @@ from sqlite3 import Connection
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from . import auth, config_files, recipe_store, schemas, services
+from . import auth, config_files, recipe_store, schemas, services, vision
 from .db import get_db
 
 router = APIRouter(prefix="/api")
@@ -47,6 +47,11 @@ def criteria():
 def create_offer(body: schemas.OfferIn, user: auth.User = supplier_only, db: Connection = DB):
     offer_id = services.create_offer(db, user.username, body.items)
     return _offer_result(db, offer_id)
+
+
+@router.post("/offers/analyze-photo", response_model=schemas.PhotoAnalysis)
+def analyze_photo(body: schemas.PhotoIn, _: auth.User = supplier_only):
+    return vision.analyze_photo(body.image_data_url)
 
 
 @router.get("/offers/{offer_id}", response_model=schemas.OfferResult)

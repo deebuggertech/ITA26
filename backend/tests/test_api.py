@@ -97,3 +97,34 @@ def test_produce_count_limited_and_atomic(client):
     ok = client.post(f"/api/regnauer/produce/{rec['id']}", json={"count": rec["max_count"]}, headers=reg)
     assert ok.status_code == 200 and len(ok.json()) == rec["max_count"]
     assert all(r["id"] != rec["id"] for r in client.get("/api/regnauer/buildable", headers=reg).json())
+
+
+def test_photo_analysis(client, monkeypatch):
+    from app import vision
+    sup = login(client, "bauer")
+    img = "data:image/jpeg;base64,AAAA"
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    assert client.post("/api/offers/analyze-photo", json={"image_data_url": img}, headers=sup).status_code == 503
+
+    seen = {}
+
+    def fake(payload):
+        seen.update(payload)
+        text = '{"material": "Rundhölzer", "length_cm": 200, "diameter_cm": 12, "quantity": 5, "note": "ok"}'
+        return {"candidates": [{"content": {"parts": [{"text": text}]}}]}
+
+    monkeypatch.setattr(vision, "_generate", fake)
+    r = client.post("/api/offers/analyze-photo", json={"image_data_url": img}, headers=sup)
+    assert r.status_code == 200 and r.json()["diameter_cm"] == 12 and r.json()["quantity"] == 5
+    assert "Rundhölzer" in seen["contents"][0]["parts"][0]["text"]  # every material's format is in the request
+    assert client.post("/api/offers/analyze-photo", json={"image_data_url": "x"}, headers=sup).status_code == 422
+    assert client.post("/api/offers/analyze-photo", json={"image_data_url": img}, headers=login(client, "drk")).status_code == 403
+
+
+def test_offer_with_new_material_fields(client):
+    sup = login(client, "bauer")
+    item = {"material": "Rundhölzer", "length_cm": 200, "diameter_cm": 12, "quantity": 3}
+    r = client.post("/api/offers", json={"items": [item]}, headers=sup)
+    assert r.status_code == 200 and r.json()["items"][0]["diameter_cm"] == 12
+    bad = client.post("/api/offers", json={"items": [{**item, "diameter_cm": None}]}, headers=sup)
+    assert bad.status_code == 422

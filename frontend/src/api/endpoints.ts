@@ -1,7 +1,7 @@
 import { api } from "./client";
 import type {
   AidResult, Bounds, BuildableRecipe, Criterion, DemoUser, Item, MaterialType, Module, OfferResult, Recipe, RecipeUpdate,
-  ScoreRow, Session, ItemDraft, SupplierEstimate,
+  ScoreRow, Session, ItemDraft, PhotoAnalysis, SupplierEstimate,
 } from "./types";
 
 export const login = (username: string, password: string) =>
@@ -30,3 +30,5 @@ export const scoreboard = () => api<ScoreRow[]>("/scoreboard");
 export const searchAid = (people: number, filters: Record<string, Bounds>) =>
   api<AidResult>("/aid/search", { body: { people, filters } });
 export const supplierEstimate = () => api<SupplierEstimate>("/supplier/estimate");
+export const analyzePhoto = (imageDataUrl: string) =>
+  api<PhotoAnalysis>("/offers/analyze-photo", { body: { image_data_url: imageDataUrl } });

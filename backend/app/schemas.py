@@ -31,11 +31,29 @@ class ItemIn(BaseModel):
     length_cm: float | None = Field(default=None, gt=0)
     width_cm: float | None = Field(default=None, gt=0)
     thickness_cm: float | None = Field(default=None, gt=0)
+    diameter_cm: float | None = Field(default=None, gt=0)
+    weight_kg: float | None = Field(default=None, gt=0)
     quantity: int = Field(gt=0)
     delivery_own: bool = False
     delivery_date: str | None = None
     note: str = ""
     photo_data_url: str | None = None
+
+
+class PhotoIn(BaseModel):
+    image_data_url: str
+
+
+class PhotoAnalysis(BaseModel):
+    """Same units as ItemIn: lengths in cm, weight in kg. Unknown values stay None."""
+    material: str | None = None
+    length_cm: float | None = None
+    width_cm: float | None = None
+    thickness_cm: float | None = None
+    diameter_cm: float | None = None
+    weight_kg: float | None = None
+    quantity: int | None = None
+    note: str = ""
 
 
 class OfferIn(BaseModel):
@@ -49,6 +67,8 @@ class ItemOut(BaseModel):
     length_cm: float | None
     width_cm: float | None
     thickness_cm: float | None
+    diameter_cm: float | None
+    weight_kg: float | None
     quantity: int
     remaining: int
     delivery_own: bool

@@ -10,7 +10,8 @@ from . import config_files, recipe_store, settings
 from .auth import USERS
 from .schemas import MAX_BATCH, Bounds, ItemIn
 
-_DIM_COLUMNS = {"length": "length_cm", "width": "width_cm", "thickness": "thickness_cm"}
+_DIM_COLUMNS = {"length": "length_cm", "width": "width_cm", "thickness": "thickness_cm",
+                "diameter": "diameter_cm", "weight": "weight_kg"}
 _DATA_URL = re.compile(r"^data:image/(png|jpe?g|webp|gif);base64,(.+)$", re.S)
 MAX_PHOTO_BYTES = 5 * 1024 * 1024
 
@@ -48,10 +49,11 @@ def create_offer(conn: Connection, supplier: str, items: list[ItemIn]) -> int:
     for item in items:
         accepted = item.material in needed
         conn.execute(
-            """INSERT INTO items (offer_id, supplier, material, length_cm, width_cm, thickness_cm,
+            """INSERT INTO items (offer_id, supplier, material, length_cm, width_cm, thickness_cm, diameter_cm, weight_kg,
                quantity, remaining, delivery_own, delivery_date, note, photo, accepted, reject_reason)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (offer_id, supplier, item.material, item.length_cm, item.width_cm, item.thickness_cm,
+             item.diameter_cm, item.weight_kg,
              item.quantity, item.quantity, item.delivery_own, item.delivery_date or None, item.note,
              _save_photo(item.photo_data_url), accepted,
              None if accepted else "Wird aktuell von keinem Modulplan benötigt"),
@@ -61,7 +63,7 @@ def create_offer(conn: Connection, supplier: str, items: list[ItemIn]) -> int:
 
 def item_out(row: Row) -> dict:
     return {
-        **{k: row[k] for k in ("id", "material", "length_cm", "width_cm", "thickness_cm", "quantity",
+        **{k: row[k] for k in ("id", "material", "length_cm", "width_cm", "thickness_cm", "diameter_cm", "weight_kg", "quantity",
                                "remaining", "delivery_date", "note", "reject_reason", "status")},
         "supplier_name": USERS[row["supplier"]].display_name,
         "delivery_own": bool(row["delivery_own"]),

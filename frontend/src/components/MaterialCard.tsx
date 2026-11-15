@@ -6,6 +6,8 @@ export interface CardItem {
   length_cm?: number | null;
   width_cm?: number | null;
   thickness_cm?: number | null;
+  diameter_cm?: number | null;
+  weight_kg?: number | null;
   quantity: number;
   remaining?: number;
   delivery_own: boolean;
@@ -26,6 +28,7 @@ interface Props {
 export function MaterialCard({ item, badge, actions, footer }: Props) {
   const dims = describeDimensions({
     length_cm: item.length_cm ?? null, width_cm: item.width_cm ?? null, thickness_cm: item.thickness_cm ?? null,
+    diameter_cm: item.diameter_cm ?? null, weight_kg: item.weight_kg ?? null,
   });
   return (
     <article className="card item">

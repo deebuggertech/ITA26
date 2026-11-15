@@ -3,25 +3,285 @@
     "name": "Holzbalken",
     "description": "Konstruktionsholz als Balken, Angabe der Länge pro Stück",
     "fields": [
-      { "key": "length", "label": "Länge", "units": { "cm": 1, "m": 100 }, "default_unit": "cm" },
-      { "key": "quantity", "label": "Anzahl", "unit_label": "Stück", "integer": true }
+      {
+        "key": "length",
+        "label": "Länge",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Stück",
+        "integer": true
+      }
     ]
   },
   {
     "name": "Sperrholzplatten",
     "description": "Platten mit Länge × Breite × Dicke pro Stück",
     "fields": [
-      { "key": "length", "label": "Länge", "units": { "cm": 1, "m": 100 }, "default_unit": "cm" },
-      { "key": "width", "label": "Breite", "units": { "cm": 1, "m": 100 }, "default_unit": "cm" },
-      { "key": "thickness", "label": "Dicke", "units": { "mm": 0.1, "cm": 1 }, "default_unit": "cm" },
-      { "key": "quantity", "label": "Anzahl", "unit_label": "Stück", "integer": true }
+      {
+        "key": "length",
+        "label": "Länge",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "width",
+        "label": "Breite",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "thickness",
+        "label": "Dicke",
+        "units": {
+          "mm": 0.1,
+          "cm": 1
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Stück",
+        "integer": true
+      }
     ]
   },
   {
     "name": "Nägel",
     "description": "Befestigungsmaterial, Angabe als Stückzahl",
     "fields": [
-      { "key": "quantity", "label": "Menge", "unit_label": "Stück", "integer": true }
+      {
+        "key": "quantity",
+        "label": "Menge",
+        "unit_label": "Stück",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Rundhölzer",
+    "description": "Rundholz oder Stangen, Länge und Durchmesser pro Stück",
+    "fields": [
+      {
+        "key": "length",
+        "label": "Länge",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "diameter",
+        "label": "Durchmesser",
+        "units": {
+          "mm": 0.1,
+          "cm": 1
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Stück",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Dachlatten",
+    "description": "Schmale Latten mit Länge × Breite × Dicke pro Stück",
+    "fields": [
+      {
+        "key": "length",
+        "label": "Länge",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "width",
+        "label": "Breite",
+        "units": {
+          "mm": 0.1,
+          "cm": 1
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "thickness",
+        "label": "Dicke",
+        "units": {
+          "mm": 0.1,
+          "cm": 1
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Stück",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Dämmmatten",
+    "description": "Dämmung als Matten oder Rollen, Maße pro Stück",
+    "fields": [
+      {
+        "key": "length",
+        "label": "Länge",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "width",
+        "label": "Breite",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "thickness",
+        "label": "Dicke",
+        "units": {
+          "mm": 0.1,
+          "cm": 1
+        },
+        "default_unit": "cm"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Rollen/Matten",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Dämmflocken",
+    "description": "Lose Dämmung in Säcken, Angabe von Gewicht pro Sack",
+    "fields": [
+      {
+        "key": "weight",
+        "label": "Gewicht pro Sack",
+        "units": {
+          "kg": 1,
+          "g": 0.001
+        },
+        "default_unit": "kg"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Säcke",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Schrauben",
+    "description": "Schrauben, Angabe von Länge und Stückzahl",
+    "fields": [
+      {
+        "key": "length",
+        "label": "Schraubenlänge",
+        "units": {
+          "mm": 0.1,
+          "cm": 1
+        },
+        "default_unit": "mm"
+      },
+      {
+        "key": "quantity",
+        "label": "Menge",
+        "unit_label": "Stück",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Dampfbremsfolie",
+    "description": "Folie als Rolle, Länge und Breite pro Rolle",
+    "fields": [
+      {
+        "key": "length",
+        "label": "Länge",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "m"
+      },
+      {
+        "key": "width",
+        "label": "Breite",
+        "units": {
+          "cm": 1,
+          "m": 100
+        },
+        "default_unit": "m"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Rollen",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Metallwinkel",
+    "description": "Verbindungsbeschläge, Angabe als Stückzahl",
+    "fields": [
+      {
+        "key": "quantity",
+        "label": "Menge",
+        "unit_label": "Stück",
+        "integer": true
+      }
+    ]
+  },
+  {
+    "name": "Holzspäne",
+    "description": "Späne oder Granulat in Säcken, Gewicht pro Sack",
+    "fields": [
+      {
+        "key": "weight",
+        "label": "Gewicht pro Sack",
+        "units": {
+          "kg": 1,
+          "g": 0.001
+        },
+        "default_unit": "kg"
+      },
+      {
+        "key": "quantity",
+        "label": "Anzahl",
+        "unit_label": "Säcke",
+        "integer": true
+      }
     ]
   }
 ]

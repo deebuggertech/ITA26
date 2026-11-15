@@ -8,7 +8,7 @@ export function Scoreboard() {
   const { data, error } = useLoad(scoreboard);
   return (
     <Layout>
-      <h1>Scoreboard</h1>
+      <h1>Projekte</h1>
       <p className="muted">Untergebrachte Personen = Summe der Personenfaktoren aller Module, für die Material des Unternehmens verbaut wurde.</p>
       {error && <p className="error">{error}</p>}
       <table className="table">

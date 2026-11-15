@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS offers (
 );
 CREATE TABLE IF NOT EXISTS items (
     id INTEGER PRIMARY KEY, offer_id INTEGER NOT NULL REFERENCES offers(id), supplier TEXT NOT NULL,
-    material TEXT NOT NULL, length_cm REAL, width_cm REAL, thickness_cm REAL,
+    material TEXT NOT NULL, length_cm REAL, width_cm REAL, thickness_cm REAL, diameter_cm REAL, weight_kg REAL,
     quantity INTEGER NOT NULL, remaining INTEGER NOT NULL,
     delivery_own INTEGER NOT NULL, delivery_date TEXT, note TEXT NOT NULL DEFAULT '', photo TEXT,
     accepted INTEGER NOT NULL, reject_reason TEXT,
@@ -52,6 +52,14 @@ def get_db():
         yield conn
 
 
+# Columns added after the first release; CREATE TABLE IF NOT EXISTS does not touch existing databases.
+_ADDED_ITEM_COLUMNS = ("diameter_cm", "weight_kg")
+
+
 def init_db() -> None:
     with session() as conn:
         conn.executescript(SCHEMA)
+        have = {r["name"] for r in conn.execute("PRAGMA table_info(items)")}
+        for column in _ADDED_ITEM_COLUMNS:
+            if column not in have:
+                conn.execute(f"ALTER TABLE items ADD COLUMN {column} REAL")

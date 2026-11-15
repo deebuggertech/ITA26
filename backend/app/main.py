@@ -4,15 +4,13 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from . import settings
-from .db import init_db
 from .routes import router
-from .seed import seed_if_empty
+from .seed import reset_and_seed
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    init_db()
-    seed_if_empty()
+    reset_and_seed()
     yield
 
 

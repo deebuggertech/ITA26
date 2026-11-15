@@ -14,7 +14,7 @@ export interface DemoUser {
 }
 
 export interface FieldDef {
-  key: "length" | "width" | "thickness" | "quantity";
+  key: "length" | "width" | "thickness" | "diameter" | "weight" | "quantity";
   label: string;
   units?: Record<string, number>;
   default_unit?: string;
@@ -52,6 +52,8 @@ export interface ItemDraft {
   length_cm?: number;
   width_cm?: number;
   thickness_cm?: number;
+  diameter_cm?: number;
+  weight_kg?: number;
   quantity: number;
   delivery_own: boolean;
   delivery_date?: string;
@@ -66,6 +68,8 @@ export interface Item {
   length_cm: number | null;
   width_cm: number | null;
   thickness_cm: number | null;
+  diameter_cm: number | null;
+  weight_kg: number | null;
   quantity: number;
   remaining: number;
   delivery_own: boolean;
@@ -140,4 +144,16 @@ export interface AidResult {
   total_people: number;
   requested: number;
   shortfall: number;
+}
+
+/** Lengths in cm, weight in kg; null where the model could not tell. */
+export interface PhotoAnalysis {
+  material: string | null;
+  length_cm: number | null;
+  width_cm: number | null;
+  thickness_cm: number | null;
+  diameter_cm: number | null;
+  weight_kg: number | null;
+  quantity: number | null;
+  note: string;
 }

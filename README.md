@@ -1,17 +1,31 @@
 # Regnauer Kreislauf-Hilfe (Prototyp)
 
 ## Start
-Backend (Port 8000, legt Demo-Daten beim ersten Start an):
+Alle Befehle im Projektverzeichnis (`ITA26/`) ausführen. Die Klammern `( … )` starten eine Subshell, deshalb bleibt das aktuelle Verzeichnis unverändert.
 
-    cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-    .venv/bin/uvicorn app.main:app --reload
+Einmalige Einrichtung:
 
-Frontend (Port 5173, proxyt /api an das Backend):
+    (cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt)
+    npm --prefix frontend install
 
-    cd frontend && npm install && npm run dev
+Backend (Port 8000):
+
+    (cd backend && .venv/bin/uvicorn app.main:app --reload)
+
+Frontend (Port 5173, proxyt /api an das Backend), in einem zweiten Terminal:
+
+    npm --prefix frontend run dev
+
+## Neustart
+Laufende Instanzen beenden und beide neu starten (jeweils aus dem Projektverzeichnis):
+
+    pkill -f "uvicorn app.main"; pkill -f "vite"
+    (cd backend && .venv/bin/uvicorn app.main:app --reload)      # Terminal 1
+    npm --prefix frontend run dev                                # Terminal 2
+
+Bei **jedem Backend-Start** wird die Datenbank gelöscht und mit den Demodaten neu befüllt (Angebote, Anlieferungen, bereits produzierte Module). Hochgeladene Fotos werden ebenfalls gelöscht. Das gilt auch für den automatischen Reload bei Code-Änderungen.
 
 Demo-Logins (Passwort `demo`): bauer, nord, meier (Zulieferer), nordlicht (Spedition), regnauer, drk (Hilfsorganisation).
-Reset: `backend/data/` löschen.
 
 ## Anpassbar ohne Code
 - `backend/config/material-types.json`, `backend/config/parts-criteria.json`
@@ -19,9 +33,6 @@ Reset: `backend/data/` löschen.
 - Farben: Variablen am Anfang von `frontend/src/styles.css`
 - Logo/Hintergrund: `frontend/public/logo.jpg`, `hero.jpg` ersetzen (Pfad in `--hero-image`)
 
-## Demo-Website (iframe-Einbettung)
-Beispiel einer Firmenwebsite mit dem Badge (Frontend muss auf :5173 laufen):
-
-    cd demo-site && python3 -m http.server 5174
-
 Badge-Code pro Unternehmen: Scoreboard-Seite, Spalte „Einbetten“. Standort-Marker der Karte: `frontend/src/shelterSites.ts`.
+
+Foto-Erkennung (Zulieferer): `backend/.env.example` nach `backend/.env` kopieren und befüllen (`GEMINI_API_KEY`, optional `GEMINI_MODEL`), dann das Backend neu starten.

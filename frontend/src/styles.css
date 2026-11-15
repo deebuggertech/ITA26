@@ -54,7 +54,9 @@ a { color: inherit; }
 .muted-on-header { opacity: .6; }
 
 /* Landing */
-.page-hero { background: linear-gradient(180deg, rgba(20, 16, 12, .45), rgba(20, 16, 12, .78)), var(--hero-image) center / cover fixed; color: var(--header-text); }
+.page-hero { position: relative; isolation: isolate; color: var(--header-text); }
+/* Own layer so only the background is blurred; the negative inset hides the soft edges the blur creates. */
+.page-hero::before { content: ""; position: fixed; inset: -12px; z-index: -1; background: linear-gradient(180deg, rgba(20, 16, 12, .45), rgba(20, 16, 12, .78)), var(--hero-image) center / cover; filter: blur(5px); }
 .page-hero .header { position: absolute; inset: 0 0 auto 0; background: transparent; backdrop-filter: none; }
 .page-hero .main { display: flex; align-items: center; justify-content: center; }
 .hero { width: 100%; max-width: 1100px; }
@@ -155,3 +157,7 @@ body.embed-body { background: transparent; }
 .embed-stats b { font-size: 1.35rem; line-height: 1.2; font-weight: 600; color: #e6c75a; }
 .embed-stats span { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: #d9e6d3; }
 @media (max-width: 560px) { .embed { flex-wrap: wrap; } .embed-text { flex-basis: 60%; } }
+
+.camera { width: 100%; max-height: 320px; background: #000; border-radius: 8px; object-fit: cover; }
+.file-button { cursor: pointer; }
+label.button { flex-direction: row; justify-content: center; color: var(--text); font-size: 1rem; font-weight: 500; }

@@ -1,13 +1,22 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { ItemDraft, MaterialType } from "../api/types";
 import { buildDraft, defaultUnit, readAsDataUrl, type FieldInput } from "../lib";
+
+/** Values to load into the form, e.g. from a photo analysis. A new object replaces whatever is entered. */
+export interface Prefill {
+  name: string;
+  inputs: Record<string, FieldInput>;
+  note: string;
+  photo: string;
+}
 
 interface Props {
   types: MaterialType[];
   onAdd: (draft: ItemDraft) => void;
+  prefill?: Prefill | null;
 }
 
-export function MaterialForm({ types, onAdd }: Props) {
+export function MaterialForm({ types, onAdd, prefill }: Props) {
   const [name, setName] = useState("");
   const [inputs, setInputs] = useState<Record<string, FieldInput>>({});
   const [deliveryOwn, setDeliveryOwn] = useState(false);
@@ -15,6 +24,11 @@ export function MaterialForm({ types, onAdd }: Props) {
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!prefill) return;
+    setName(prefill.name); setInputs(prefill.inputs); setNote(prefill.note); setPhoto(prefill.photo); setError(null);
+  }, [prefill]);
 
   const type = types.find((t) => t.name === name);
 
@@ -41,7 +55,7 @@ export function MaterialForm({ types, onAdd }: Props) {
     <form className="card form" onSubmit={onSubmit}>
       <label>
         Material
-        <input list="material-names" value={name} placeholder="z. B. Holzbalken" onChange={(e) => { setName(e.target.value); setInputs({}); }} />
+        <input list="material-names" value={name} placeholder={types[0]?.name} onChange={(e) => { setName(e.target.value); setInputs({}); }} />
         <datalist id="material-names">
           {types.map((t) => <option key={t.name} value={t.name}>{t.description}</option>)}
         </datalist>
