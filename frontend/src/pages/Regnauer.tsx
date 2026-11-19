@@ -1,13 +1,13 @@
 import { useState } from "react";
 import * as api from "../api/endpoints";
-import type { BuildableRecipe, Item, Module, Recipe } from "../api/types";
+import type { BuildableRecipe, Recipe } from "../api/types";
 import { Layout } from "../components/Layout";
-import { formatRating } from "../lib";
 import { MaterialCard } from "../components/MaterialCard";
 import { Modal } from "../components/Modal";
 import { RecipeForm } from "../components/RecipeForm";
 import { Tabs } from "../components/Tabs";
 import { useLoad } from "../hooks/useLoad";
+import { formatRating } from "../lib";
 
 const TABS = ["Dashboard", "Modulpläne"];
 
@@ -40,7 +40,7 @@ function Dashboard() {
           <p className="error">{error ?? items.error ?? buildable.error ?? stock.error}</p>
         )}
         {items.data?.length === 0 && <p className="muted">Keine Angebote vorhanden.</p>}
-        {items.data?.map((i: Item) => (
+        {items.data?.map((i) => (
           <MaterialCard
             key={i.id}
             item={{ ...i, photo: i.photo_url }}
@@ -60,7 +60,7 @@ function Dashboard() {
         <section>
           <h2>Lagerbestand / Fertige Module ({stock.data?.length ?? 0})</h2>
           {stock.data?.length === 0 && <p className="muted">Noch keine Module produziert.</p>}
-          {stock.data?.map((m: Module) => (
+          {stock.data?.map((m) => (
             <article className="card item" key={m.id}>
               <div className="item-body">
                 <strong>{m.recipe_name}</strong>

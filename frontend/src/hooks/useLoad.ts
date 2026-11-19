@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/** Loads data on mount and whenever `deps` change; `reload` refetches on demand. */
 export function useLoad<T>(fetcher: () => Promise<T>, deps: unknown[] = []) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const latest = useRef(0);
 
   const reload = useCallback(() => {
-    // Responses can arrive out of order; only the newest request may update the state.
+    // Ignore responses that arrive out of order.
     const id = ++latest.current;
     fetcher()
       .then((d) => { if (id === latest.current) { setData(d); setError(null); } })

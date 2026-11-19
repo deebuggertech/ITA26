@@ -1,12 +1,10 @@
-"""Recipes are plain Python files so non-trivial rules stay possible.
-
-They are re-imported on every call: editing a file takes effect without a restart.
-"""
+"""Recipes are plain Python files, re-imported on every call so edits apply without a restart."""
 import importlib.util
 import json
 import re
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from types import ModuleType
 
 from fastapi import HTTPException
@@ -14,6 +12,7 @@ from fastapi import HTTPException
 from . import settings
 
 _META_BLOCK = re.compile(r"# META-BEGIN\n.*?# META-END", re.S)
+
 
 @dataclass
 class Recipe:
@@ -39,7 +38,7 @@ class Recipe:
         return {"id": self.id, **self.meta}
 
 
-def _load(path) -> Recipe:
+def _load(path: Path) -> Recipe:
     # Recipes import `_helpers` as a sibling module.
     if str(settings.RECIPES_DIR) not in sys.path:
         sys.path.insert(0, str(settings.RECIPES_DIR))
@@ -61,18 +60,14 @@ def get_recipe(recipe_id: str) -> Recipe:
     return _load(path)
 
 
-def _dump(value) -> str:
-    # JSON literals of str/number/list/dict are valid Python.
-    return json.dumps(value, ensure_ascii=False, indent=4)
-
-
 def update_meta(recipe_id: str, changes: dict) -> Recipe:
     recipe = get_recipe(recipe_id)
-    meta = {**recipe.meta, **changes}
     path = settings.RECIPES_DIR / f"{recipe_id}.py"
-    block = f"# META-BEGIN\nMETA = {_dump(meta)}\n# META-END"
     source = path.read_text(encoding="utf-8")
     if not _META_BLOCK.search(source):
         raise HTTPException(409, "Dieser Modulplan hat keinen bearbeitbaren META-Block")
+    # JSON literals of str/number/list/dict are valid Python.
+    fields = ",\n".join(f"    {json.dumps(k)}: {json.dumps(v, ensure_ascii=False)}" for k, v in {**recipe.meta, **changes}.items())
+    block = f"# META-BEGIN\nMETA = {{\n{fields},\n}}\n# META-END"
     path.write_text(_META_BLOCK.sub(lambda _: block, source, count=1), encoding="utf-8")
     return get_recipe(recipe_id)

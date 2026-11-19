@@ -5,14 +5,13 @@ export interface Portal {
   title: string;
   path: string;
   roles: string[];
-  blurb: string;
 }
 
 export const PORTALS: Portal[] = [
-  { slug: "zulieferer", title: "Zulieferer & Speditionen", path: "/zulieferer", roles: ["supplier", "logistics"], blurb: "Material anbieten, Routen melden" },
-  { slug: "regnauer", title: "Regnauer", path: "/regnauer", roles: ["manufacturer"], blurb: "Material, Modulpläne, Produktion" },
-  { slug: "scoreboard", title: "Projekte", path: "/scoreboard", roles: [], blurb: "Öffentliche Wirkungsbilanz" },
-  { slug: "hilfsorganisationen", title: "Hilfsorganisationen", path: "/hilfsorganisationen", roles: ["aid"], blurb: "Verfügbare Module finden" },
+  { slug: "zulieferer", title: "Zulieferer & Speditionen", path: "/zulieferer", roles: ["supplier", "logistics"] },
+  { slug: "regnauer", title: "Regnauer", path: "/regnauer", roles: ["manufacturer"] },
+  { slug: "scoreboard", title: "Projekte", path: "/scoreboard", roles: [] },
+  { slug: "hilfsorganisationen", title: "Hilfsorganisationen", path: "/hilfsorganisationen", roles: ["aid"] },
 ];
 
 const DIM_COLUMN = {
@@ -24,7 +23,7 @@ export interface FieldInput {
   unit: string;
 }
 
-/** Converts form input (with user-chosen units) into the cm-based payload the API expects. */
+/** Form input in user-chosen units -> cm/kg payload. Returns an error message on invalid input. */
 export function buildDraft(
   type: MaterialType,
   inputs: Record<string, FieldInput>,
@@ -76,7 +75,7 @@ export function formatRating(c: Criterion, value: Rating | undefined): string {
 export const embedSnippet = (slug: string) =>
   `<iframe src="${window.location.origin}/embed/${slug}" width="100%" height="130" style="border:0" title="Re:Build Impact"></iframe>`;
 
-/** Turns an analysis (cm/kg) into form inputs in each field's default unit. */
+/** Photo analysis (cm/kg) -> form inputs in each field's default unit. */
 export function analysisToInputs(type: MaterialType, a: PhotoAnalysis): Record<string, FieldInput> {
   const inputs: Record<string, FieldInput> = {};
   for (const field of type.fields) {
@@ -91,7 +90,7 @@ export function analysisToInputs(type: MaterialType, a: PhotoAnalysis): Record<s
 
 const MAX_EDGE = 1280;
 
-/** Shrinks a camera frame or upload so the request stays small. */
+/** Caps the longest edge so the request stays small. */
 export function downscaleToJpeg(source: CanvasImageSource, width: number, height: number): string {
   const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
   const canvas = document.createElement("canvas");
@@ -106,5 +105,5 @@ export async function fileToJpeg(file: File): Promise<string> {
   return downscaleToJpeg(bitmap, bitmap.width, bitmap.height);
 }
 
-/** Quick fix for the supplier panels: demo figures are scaled down to a quarter and shown as whole numbers. */
+/** Demo figures on the supplier panels are scaled to a quarter. */
 export const quarter = (n: number) => Math.round(n / 4);

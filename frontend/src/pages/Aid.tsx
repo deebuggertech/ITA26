@@ -11,7 +11,7 @@ export function AidPortal() {
   const [filters, setFilters] = useState<Record<string, Bounds>>({});
   const setBound = (key: string, side: keyof Bounds, raw: string) =>
     setFilters((f) => ({ ...f, [key]: { ...f[key], [side]: raw === "" ? undefined : Number(raw) } }));
-  // Empty fields are dropped by JSON.stringify, so an untouched filter excludes nothing.
+  // Undefined bounds vanish in JSON, so untouched filters exclude nothing.
   const result = useLoad(() => searchAid(people, filters), [people, filters]);
   const r = result.data;
 
@@ -52,8 +52,8 @@ export function AidPortal() {
             <div className="card">
               <div className="bar"><i style={{ width: `${Math.min(100, (r.total_people / r.requested) * 100)}%` }} /></div>
               <p>
-              <strong>{r.total_people} Personen</strong> können untergebracht werden (Bedarf: {r.requested}).{" "}
-              {r.shortfall > 0 ? <span className="error">Es fehlen noch Plätze für {r.shortfall} Personen.</span> : <span className="ok">Bedarf gedeckt.</span>}
+                <strong>{r.total_people} Personen</strong> können untergebracht werden (Bedarf: {r.requested}).{" "}
+                {r.shortfall > 0 ? <span className="error">Es fehlen noch Plätze für {r.shortfall} Personen.</span> : <span className="ok">Bedarf gedeckt.</span>}
               </p>
             </div>
           )}

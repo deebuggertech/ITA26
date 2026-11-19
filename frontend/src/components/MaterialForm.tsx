@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import type { ItemDraft, MaterialType } from "../api/types";
 import { buildDraft, defaultUnit, readAsDataUrl, type FieldInput } from "../lib";
 
-/** Values to load into the form, e.g. from a photo analysis. A new object replaces whatever is entered. */
+/** Replaces the form contents whenever a new object arrives (photo analysis). */
 export interface Prefill {
   name: string;
   inputs: Record<string, FieldInput>;

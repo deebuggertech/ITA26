@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 MAX_BATCH = 1000
 
-# A criterion is either a single value or a (from, to) range, as defined in parts-criteria.json.
+# Single value or (from, to) range, per the criterion's kind in parts-criteria.json.
 Rating = float | tuple[float, float]
 
 
@@ -13,17 +13,14 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class LoginResponse(BaseModel):
-    token: str
-    username: str
-    display_name: str
-    role: str
-
-
 class DemoUser(BaseModel):
     username: str
     display_name: str
     role: str
+
+
+class LoginResponse(DemoUser):
+    token: str
 
 
 class ItemIn(BaseModel):

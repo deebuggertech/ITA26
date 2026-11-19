@@ -24,7 +24,6 @@ interface Props {
   footer?: ReactNode;
 }
 
-/** Shared by supplier staging list, offer result and the Regnauer dashboard. */
 export function MaterialCard({ item, badge, actions, footer }: Props) {
   const dims = describeDimensions({
     length_cm: item.length_cm ?? null, width_cm: item.width_cm ?? null, thickness_cm: item.thickness_cm ?? null,

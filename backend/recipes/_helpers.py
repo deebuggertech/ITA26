@@ -1,9 +1,7 @@
-"""Shared inventory maths for recipes.
+"""Inventory maths for recipes.
 
-An inventory is a list of dicts: id, material, supplier, length_cm, width_cm,
-thickness_cm, quantity. Recipes mutate `quantity` in place when consuming;
-the backend diffs before/after to learn what was used.
-Deliberately no geometric cutting: only piece counts, total length or total area.
+An inventory is a list of item dicts; consuming mutates `quantity` in place and the backend
+diffs before/after to credit suppliers. No geometric cutting: only counts, total length or total area.
 """
 from math import ceil
 
@@ -13,7 +11,6 @@ MEASURES = {
     "area": lambda i: (i.get("length_cm") or 0) * (i.get("width_cm") or 0) * i["quantity"],
 }
 
-# Per-piece size of one unit, used to decide how many whole pieces to take.
 _PIECE = {
     "count": lambda i: 1,
     "length": lambda i: i.get("length_cm") or 0,

@@ -7,11 +7,7 @@ export interface Session {
   role: Role;
 }
 
-export interface DemoUser {
-  username: string;
-  display_name: string;
-  role: Role;
-}
+export type DemoUser = Omit<Session, "token">;
 
 export interface FieldDef {
   key: "length" | "width" | "thickness" | "diameter" | "weight" | "quantity";
@@ -27,7 +23,7 @@ export interface MaterialType {
   fields: FieldDef[];
 }
 
-/** A single value, or a [from, to] range when the criterion's kind is "range". */
+/** Single value, or [from, to] for "range" criteria. */
 export type Rating = number | [number, number];
 
 export interface Criterion {
@@ -46,7 +42,6 @@ export interface Bounds {
   max?: number;
 }
 
-/** What the supplier form produces; sent as-is to POST /api/offers. */
 export interface ItemDraft {
   material: string;
   length_cm?: number;
@@ -95,12 +90,7 @@ export interface Recipe {
   ratings: Record<string, Rating>;
 }
 
-export interface RecipeUpdate {
-  description: string;
-  build_minutes: number;
-  shelter_person_factor: number;
-  ratings: Record<string, Rating>;
-}
+export type RecipeUpdate = Omit<Recipe, "id" | "name">;
 
 export interface SupplierEstimate {
   credited_modules: number;

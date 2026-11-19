@@ -7,7 +7,7 @@ export function Landing() {
     <Layout hero>
       <section className="hero">
         <div className="portal-grid">
-          {PORTALS.map((p, _) => (
+          {PORTALS.map((p) => (
             <Link key={p.slug} to={p.path} className="portal">
               <strong>{p.title}</strong>
             </Link>

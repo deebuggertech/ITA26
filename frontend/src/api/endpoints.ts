@@ -23,7 +23,7 @@ export const produce = (recipeId: string, count: number) =>
   api<Module[]>(`/regnauer/produce/${recipeId}`, { method: "POST", body: { count } });
 export const stock = () => api<Module[]>("/regnauer/modules");
 export const recipes = () => api<Recipe[]>("/regnauer/recipes");
-export const updateRecipe = (id: string, input: Omit<RecipeUpdate, "name" | "requirements">) =>
+export const updateRecipe = (id: string, input: RecipeUpdate) =>
   api<Recipe>(`/regnauer/recipes/${id}`, { method: "PUT", body: input });
 
 export const scoreboard = () => api<ScoreRow[]>("/scoreboard");

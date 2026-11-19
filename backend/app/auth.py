@@ -13,30 +13,23 @@ class User:
     role: str  # supplier | logistics | manufacturer | aid
 
 
-# Hardcoded on purpose: this is a demo, every password is "demo".
-USERS = {
-    "bauer": User("bauer", "Holzwerk Bauer GmbH", "supplier"),
-    "nord": User("nord", "Sägewerk Nord", "supplier"),
-    "meier": User("meier", "Baustoffe Meier", "supplier"),
-    "nordlicht": User("nordlicht", "Spedition Nordlicht", "logistics"),
-    "regnauer": User("regnauer", "Regnauer", "manufacturer"),
-    "drk": User("drk", "Rotes Kreuz", "aid"),
-}
+# Demo accounts: every password is "demo".
+USERS = {u.username: u for u in (
+    User("bauer", "Holzwerk Bauer GmbH", "supplier"),
+    User("nord", "Sägewerk Nord", "supplier"),
+    User("meier", "Baustoffe Meier", "supplier"),
+    User("nordlicht", "Spedition Nordlicht", "logistics"),
+    User("regnauer", "Regnauer", "manufacturer"),
+    User("drk", "Rotes Kreuz", "aid"),
+)}
 DEMO_PASSWORD = "demo"
 
-# Stateless signed tokens: the demo resets its data on every start, but a logged-in browser must not be thrown out by it.
+# Stateless tokens, so the data reset on startup does not log browsers out.
 _SECRET = os.environ.get("TOKEN_SECRET", "relief-demo-secret").encode()
 
 
 def _sign(username: str) -> str:
     return hmac.new(_SECRET, username.encode(), hashlib.sha256).hexdigest()[:32]
-
-
-def _user_from_token(token: str) -> User | None:
-    username, _, signature = token.partition(".")
-    if username in USERS and hmac.compare_digest(signature, _sign(username)):
-        return USERS[username]
-    return None
 
 
 def login(username: str, password: str) -> tuple[str, User]:
@@ -48,11 +41,11 @@ def login(username: str, password: str) -> tuple[str, User]:
 
 def require_role(*roles: str):
     def dependency(authorization: str = Header(default="")) -> User:
-        user = _user_from_token(authorization.removeprefix("Bearer "))
-        if user is None:
+        username, _, signature = authorization.removeprefix("Bearer ").partition(".")
+        if username not in USERS or not hmac.compare_digest(signature, _sign(username)):
             raise HTTPException(401, "Nicht angemeldet")
-        if user.role not in roles:
+        if USERS[username].role not in roles:
             raise HTTPException(403, "Keine Berechtigung")
-        return user
+        return USERS[username]
 
     return Depends(dependency)

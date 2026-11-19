@@ -1,7 +1,13 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+const BACKEND = "http://localhost:5172";
+
 export default defineConfig({
   plugins: [react()],
-  server: { proxy: { "/api": "http://localhost:8000", "/uploads": "http://localhost:8000" } },
+  server: {
+    port: 5173,
+    strictPort: true,
+    proxy: { "/api": BACKEND, "/uploads": BACKEND },
+  },
 });

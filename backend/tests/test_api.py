@@ -32,14 +32,13 @@ def test_produce_consumes_stock_and_scores(client):
     stock = len(client.get("/api/regnauer/modules", headers=reg).json())
     assert client.post("/api/regnauer/produce/wandelement_leichtbau", headers=reg).status_code == 200
     assert len(client.get("/api/regnauer/modules", headers=reg).json()) == stock + 1
-    # Scores are whole persons now, so a single quarter-person module may not move them; the module count does.
+    # A quarter-person module may not move the rounded score; the module count does.
     after = {r["name"]: r["modules"] for r in client.get("/api/scoreboard").json()}
     assert after["Holzwerk Bauer GmbH"] > {r["name"]: r["modules"] for r in before}["Holzwerk Bauer GmbH"]
 
 
 def test_produce_fails_without_material(client):
     reg = login(client, "regnauer")
-    # Beams are not delivered in seed data in sufficient amount for two Ständer elements.
     codes = [client.post("/api/regnauer/produce/holzstaender_element", headers=reg).status_code for _ in range(4)]
     assert 409 in codes
 
@@ -51,7 +50,7 @@ def test_aid_filter(client):
     assert all_["total_people"] > 0
     strict = search(insulation={"min": 9}).json()
     assert strict["total_people"] == 0 and strict["shortfall"] == 50
-    # Only the Ständer element covers -15 °C; the lightweight wall starts at -5 °C.
+    # Only the Ständer element covers -15 °C.
     cold = search(temperature={"min": -15, "max": 20}).json()
     assert {g["recipe_id"] for g in cold["groups"]} == {"holzstaender_element"}
     assert search(temperature={"min": 10, "max": 0}).status_code == 422
@@ -116,7 +115,7 @@ def test_photo_analysis(client, monkeypatch):
     monkeypatch.setattr(vision, "_generate", fake)
     r = client.post("/api/offers/analyze-photo", json={"image_data_url": img}, headers=sup)
     assert r.status_code == 200 and r.json()["diameter_cm"] == 12 and r.json()["quantity"] == 5
-    assert "Rundhölzer" in seen["contents"][0]["parts"][0]["text"]  # every material's format is in the request
+    assert "Rundhölzer" in seen["contents"][0]["parts"][0]["text"]  # prompt lists every material
     assert client.post("/api/offers/analyze-photo", json={"image_data_url": "x"}, headers=sup).status_code == 422
     assert client.post("/api/offers/analyze-photo", json={"image_data_url": img}, headers=login(client, "drk")).status_code == 403
 

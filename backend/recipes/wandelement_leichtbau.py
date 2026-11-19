@@ -10,7 +10,7 @@ META = {
 }
 # META-END
 
-# 2x 40x40 cm + 4x 10x30 cm = 4400 cm²; larger plates are accepted, only the total area counts.
+# 2x 40x40 cm + 4x 10x30 cm = 4400 cm²; only the total area counts.
 REQUIREMENTS = [
     {"material": "Sperrholzplatten", "measure": "area", "amount": 2 * 40 * 40 + 4 * 10 * 30},
     {"material": "Nägel", "measure": "count", "amount": 20},

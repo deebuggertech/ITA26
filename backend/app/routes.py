@@ -8,8 +8,7 @@ from .db import get_db
 
 router = APIRouter(prefix="/api")
 
-# Function scope makes the commit happen before the response is sent. With the default
-# request scope it runs afterwards, so a client that refetches right after a write reads stale data.
+# Function scope commits before the response is sent; request scope would commit afterwards and a refetch could read stale data.
 DB = Depends(get_db, scope="function")
 
 supplier_only = auth.require_role("supplier")
@@ -17,8 +16,6 @@ logistics_only = auth.require_role("logistics")
 manufacturer_only = auth.require_role("manufacturer")
 aid_only = auth.require_role("aid")
 
-
-# --- auth & config ---------------------------------------------------------
 
 @router.get("/auth/demo-users", response_model=list[schemas.DemoUser])
 def demo_users():
@@ -40,8 +37,6 @@ def material_types():
 def criteria():
     return config_files.criteria()
 
-
-# --- Zulieferer & Speditionen ---------------------------------------------
 
 @router.post("/offers", response_model=schemas.OfferResult)
 def create_offer(body: schemas.OfferIn, user: auth.User = supplier_only, db: Connection = DB):
@@ -78,8 +73,6 @@ def upload_route_data(body: schemas.LogisticsIn, user: auth.User = logistics_onl
     db.execute("INSERT INTO logistics (username, filename, content) VALUES (?,?,?)",
                (user.username, body.filename, body.content))
 
-
-# --- Regnauer --------------------------------------------------------------
 
 @router.get("/regnauer/items", response_model=list[schemas.ItemOut])
 def accepted_items(_: auth.User = manufacturer_only, db: Connection = DB):
@@ -125,34 +118,16 @@ def recipes(_: auth.User = manufacturer_only):
     return [r.summary() for r in recipe_store.all_recipes()]
 
 
-def _check_ratings(ratings: dict) -> None:
-    criteria = {c["key"]: c for c in config_files.criteria()}
-    if set(ratings) != set(criteria):
-        raise HTTPException(422, "Werte müssen für alle Kriterien angegeben werden")
-    for key, value in ratings.items():
-        c = criteria[key]
-        is_range = isinstance(value, tuple)
-        if is_range != (c["kind"] == "range"):
-            raise HTTPException(422, f"{c['label']}: {'Bereich' if c['kind'] == 'range' else 'Einzelwert'} erwartet")
-        values = value if is_range else (value,)
-        if any(not c["min"] <= v <= c["max"] for v in values) or (is_range and value[0] > value[1]):
-            raise HTTPException(422, f"{c['label']}: Werte müssen zwischen {c['min']} und {c['max']} {c['unit']} liegen")
-
-
 @router.put("/regnauer/recipes/{recipe_id}", response_model=schemas.Recipe)
 def update_recipe(recipe_id: str, body: schemas.RecipeMetaUpdate, _: auth.User = manufacturer_only):
-    _check_ratings(body.ratings)
+    services.check_ratings(body.ratings)
     return recipe_store.update_meta(recipe_id, body.model_dump()).summary()
 
-
-# --- Zulieferer-Schätzung ----------------------------------------------------
 
 @router.get("/supplier/estimate", response_model=schemas.SupplierEstimate)
 def supplier_estimate(user: auth.User = supplier_only, db: Connection = DB):
     return services.supplier_estimate(db, user.username)
 
-
-# --- öffentlich & Hilfsorganisationen -------------------------------------
 
 @router.get("/scoreboard", response_model=list[schemas.ScoreRow])
 def scoreboard(db: Connection = DB):
