@@ -88,7 +88,7 @@ export function analysisToInputs(type: MaterialType, a: PhotoAnalysis): Record<s
   return inputs;
 }
 
-const MAX_EDGE = 1280;
+const MAX_EDGE = 1024;
 
 /** Caps the longest edge so the request stays small. */
 export function downscaleToJpeg(source: CanvasImageSource, width: number, height: number): string {
@@ -97,7 +97,7 @@ export function downscaleToJpeg(source: CanvasImageSource, width: number, height
   canvas.width = Math.round(width * scale);
   canvas.height = Math.round(height * scale);
   canvas.getContext("2d")!.drawImage(source, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/jpeg", 0.85);
+  return canvas.toDataURL("image/jpeg", 0.8);
 }
 
 export async function fileToJpeg(file: File): Promise<string> {

@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from . import config_files
 from .schemas import PhotoAnalysis
 
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")  # no thinking phase -> fast, high free-tier limits
 # Tried when the main model answers 429/503.
 FALLBACK_MODEL = "gemini-flash-lite-latest"
 _URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -69,7 +69,7 @@ def _generate(payload: dict) -> dict:
     for model in (MODEL, FALLBACK_MODEL):
         # Header instead of query string keeps the key out of access logs.
         try:
-            r = httpx.post(_URL.format(model=model), json=payload, headers={"x-goog-api-key": key}, timeout=40)
+            r = httpx.post(_URL.format(model=model), json=payload, headers={"x-goog-api-key": key}, timeout=25)
         except httpx.HTTPError:
             raise HTTPException(502, "Bilderkennung nicht erreichbar")
         if r.status_code not in (429, 503):
