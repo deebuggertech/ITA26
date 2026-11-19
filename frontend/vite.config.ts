@@ -9,5 +9,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: { "/api": BACKEND, "/uploads": BACKEND },
+    host: true,
+    allowedHosts: ['ita26hackathon.deebugger.de'],
   },
 });
